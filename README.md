@@ -9,8 +9,11 @@ Reminder: You are NOT allowed to consult the internet to solve this problem.
 1 Problem Description
 
 You are given
+	
 	1. A universal set U of n elements {1, 2, 3, . . . n}.
+	
 	2. A list S1, S2, . . . Sm of subsets of U such that the union of the m subsets gives U.
+	
 	3. The weight wi of each subset Si.
 
 A cover is defined as a collection of subsets whose union is equal to U. The goal is to find a cover
