@@ -21,14 +21,22 @@ number of subsets of U. Each of the next m pairs of lines specifies a subset Si 
 In the example that follows, I’ve included comments for your understanding. Comments should not
 be included in actual inputs:
 
-5 // U = {1, 2, 3, 4, 5}
-3 // Three subsets: S1, S2, S3.
-1 2 3 // S1 = {1, 2, 3}
-15 // w1
-4 5 // S2 = {4, 5}
-6 // w2
-1 2 3 4 5 // S3 = {1, 2, 3, 4, 5}
-26 // w3
+5                                                          // U = {1, 2, 3, 4, 5}
+
+3                                                          // Three subsets: S1, S2, S3.
+
+1 2 3                                                      // S1 = {1, 2, 3}
+
+15                                                         // w1
+
+4 5                                                        // S2 = {4, 5}
+
+6                                                          // w2
+
+1 2 3 4 5                                                  // S3 = {1, 2, 3, 4, 5}
+
+26                                                         // w3
+
 We have: S1 = {1, 2, 3} with weight w1 = 15, S2 = {4, 5} with weight w2 = 6, S3 = {1, 2, 3, 4, 5}
 with weight w3 = 26. (Notice that S3 = U, but this is okay because a set can be a subset of itself.)
 
@@ -42,6 +50,7 @@ find. The next line will contain the IDs of the sets included in your cover. To 
 for cover C1 in the example is
 
 21
+
 1 2
 
 Note: This problem is NP-hard, which means that it is unrealistic to expect that your
