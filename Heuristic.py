@@ -1,4 +1,7 @@
+import glob
 import operator
+import random
+from math import exp
 
 
 def readInput(filename):
@@ -90,8 +93,41 @@ def k_min(list, k, key=None) -> list:
                 smallest.insert(i, elem)
                 smallest = smallest[:k]
                 break
-
     return smallest
+
+
+def k_weighted_random(list, k, key=None) -> list:
+    """
+    Returns a list of size min(len(list),k) of the smallest elements
+    O(kn)
+    :param list: the list to get the k smallest
+    :param key: what to compare on
+    :return: the k smallest, smallest to largest
+    """
+    if len(list) <= k:
+        if key is not None:
+            return sorted(list, key=key)
+        return sorted(list)
+
+    reweighted = [round(key(x)) for x in list]
+    maximum = max(reweighted)
+    minimum = min(reweighted)
+    # construct dictionary
+    lookup = dict()
+    val = minimum
+    for data in list:
+        curr_val = exp((maximum + 1) - round(key(data)))
+        min_val = val
+        val += curr_val
+        lookup[(min_val, val)] = data
+
+    k_weighted_random = []
+    for i in range(k):
+        random_val = random.uniform(minimum, val)
+        for key, value in lookup.items():
+            if key[0] <= random_val < key[1]:
+                k_weighted_random.append(value)
+    return k_weighted_random
 
 
 class SpotlightSearch:
@@ -139,28 +175,33 @@ class SpotlightSearch:
         return self.subsets_master[f"{sety_boi}{weight}"]
 
     def solve(self):
+        finished_sets = []
         # Seed solution with all options
         tempPaths = []
         for subset, cost in self.subsets:
             path = SpotlightSearch.Path(subset, [self._set_to_int(subset, cost)], cost, self.subsets.copy())
             path.remove_from_options(subset, cost)
             tempPaths.append(path)
+        self.paths.extend(tempPaths)
 
-        while not any([not self.universal_set - temp.current_set for temp in self.paths]):
+        while not all([(len((self.universal_set - temp.current_set)) == 0) for temp in self.paths]):
             k_best_options = self.chosing_method(tempPaths, *self.chosing_method_args, **self.chosing_method_kwargs)
             self.paths.clear()
             self.paths.extend(k_best_options)
             tempPaths = []
             # Calculate weights for each path
             for path in self.paths:
-                for subset, cost in path.options:
-                    tempPath = path.copy()
-                    tempPath.add_to_current_set(subset)
-                    tempPath.add_to_chosen_sets(self._set_to_int(subset, cost))
-                    tempPath.remove_from_options(subset, cost)
-                    tempPath.add_to_cost(cost)
-                    tempPaths.append(tempPath)
-        return [path for path in self.paths if not self.universal_set - path.current_set]
+                if len((self.universal_set - path.current_set)) != 0:
+                    for subset, cost in path.options:
+                        tempPath = path.copy()
+                        tempPath.add_to_current_set(subset)
+                        tempPath.add_to_chosen_sets(self._set_to_int(subset, cost))
+                        tempPath.remove_from_options(subset, cost)
+                        tempPath.add_to_cost(cost)
+                        tempPaths.append(tempPath)
+                else:
+                    finished_sets.append(path)
+        return finished_sets
 
 
 def solve_hill_climbing(universal_set: set, subsets: list):
@@ -171,7 +212,6 @@ def solve_hill_climbing(universal_set: set, subsets: list):
     :param subsets: the sets that can be unioned to create the universal set and their weights [(set, weight), ...]
     :return: (the covered set, the total cost, the chosen sets [based on location in subsets])
     """
-
     current_set = set()
     cost = 0
     # key: the set and weight as a string
@@ -193,8 +233,16 @@ def solve_hill_climbing(universal_set: set, subsets: list):
 
 
 if __name__ == "__main__":
-    x, y = readInput("testInputs/test3.txt")
-    print(solve_hill_climbing(x.copy(), y.copy())[1:])
-    # TODO: Implement spotlight search using annealing for choosing the k paths
-    ss = SpotlightSearch(x.copy(), y.copy(), chosing_method=k_min, k=30, key=operator.methodcaller('get_reweighted'))
-    print(k_min(ss.solve(), 1, key=operator.attrgetter('cost')))
+    for file in glob.glob('testInputs/*.txt'):
+        print(file)
+        x, y = readInput(file)
+        hill_output = solve_hill_climbing(x.copy(), y.copy())[1:]
+        print(f"Hill: Sets: {hill_output[1]}, Cost: {hill_output[0]}")
+        # TODO: Implement spotlight search using annealing for choosing the k paths
+        ss = SpotlightSearch(x.copy(), y.copy(), chosing_method=k_min, k=30,
+                             key=operator.methodcaller('get_reweighted'))
+        print(f"Spotlight: {k_min(ss.solve(), 1, key=operator.attrgetter('cost'))[0]}")
+        ssr = SpotlightSearch(x.copy(), y.copy(), chosing_method=k_weighted_random, k=30,
+                              key=operator.methodcaller('get_reweighted'))
+        print(f"Random Spotlight: {k_min(ssr.solve(), 1, key=operator.attrgetter('cost'))[0]}")
+        print("_______________________________________________________________")

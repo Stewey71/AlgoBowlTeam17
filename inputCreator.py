@@ -1,5 +1,7 @@
 import random
+
 from Heuristic import outputFile
+
 
 def set_creator(universal_set:list)-> list:
     """
@@ -37,7 +39,7 @@ subsets_and_weights = [(subsets[0], big_subset_weight)]
 minimum_weight = big_subset_weight//(len(subsets)-1)
 maximum_weight_ratio = big_subset_weight/len(subsets[0])
 #if(maximum_weight < minimum_weight):
-#    raise ValueError(f"The range for sbset weights is invalid: minimum weight {minimum_weight} > maximum weight {maximum_weight}")
+#    raise ValueError(f"The range for subset weights is invalid: minimum weight {minimum_weight} > maximum weight {maximum_weight}")
 # set weights
 # TODO: make sure that the sum(small subset weights > big_subset_weight)
 for subset in subsets[1:]:
@@ -59,7 +61,7 @@ for i in range(number_of_duplicates):
     duplicate_weight = random.randint(curr_min, curr_max)
     subsets_and_weights.append((subsets_and_weights[rand_index][0], duplicate_weight))
 
-if len(subsets_and_weights)> 500 :
+if len(subsets_and_weights) > 500:
     raise ValueError(f"Too many subsets: {len(subsets_and_weights)}")
 
 # save the input
