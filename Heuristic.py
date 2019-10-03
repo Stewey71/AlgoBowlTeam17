@@ -23,9 +23,9 @@ def readInput(filename):
     return uniSet, outputTup
 
 
-def outputFile(filename, setList, uniSetNum):
+def makeInputFile(filename, setList, uniSetNum):
     """
-    Outputs from a setlist to an output file so random generation of outputFile
+    Outputs from a setlist to an output file so random generation of makeInputFile
     works
 
     :param filename: The list of file to output to:
