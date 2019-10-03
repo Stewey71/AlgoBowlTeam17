@@ -9,7 +9,7 @@ def readInput(filename):
     Reads from input file and outputs the universal set, and a list of tuples where
     first element of tuple is the subset and second element of tuple is the weight
     of subset
-    
+
     :param filename: name of file to read in from
     """
     outputTup = []
@@ -26,9 +26,9 @@ def readInput(filename):
     return uniSet, outputTup
 
 
-def outputFile(filename, setList, uniSetNum):
+def makeInputFile(filename, setList, uniSetNum):
     """
-    Outputs from a setlist to an output file so random generation of outputFile
+    Outputs from a setlist to an output file so random generation of makeInputFile
     works
 
     :param filename: The list of file to output to:
@@ -43,7 +43,10 @@ def outputFile(filename, setList, uniSetNum):
     f.write(str(len(setList)) + "\n")
     for tup in setList:
         for i in tup[0]:
-            f.write(str(i) + " ")
+            if i == tup[-1]:
+                f.write(str(i))
+            else:
+                f.write(str(i) + " ")
         f.write("\n")
         f.write(str(tup[1]) + "\n")
     f.close()
