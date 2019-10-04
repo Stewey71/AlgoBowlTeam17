@@ -163,6 +163,15 @@ class SpotlightSearch:
             return self.cost / len(self.current_set)
 
         def __repr__(self):
+            f = open("output.txt", "a")
+            f.write(str(self.cost) + "\n")
+            for i in self.chosen_sets:
+                if i == self.chosen_sets[-1]:
+                    f.write(str(i))
+                else:
+                    f.write(str(i) + " ")
+            f.write("\n")
+            f.close()
             return f'Sets: {sorted(self.chosen_sets)}, Cost: {self.cost}'
 
     def __init__(self, universal_set, subsets, chosing_method, *args, **kwargs):
@@ -204,6 +213,7 @@ class SpotlightSearch:
                         tempPaths.append(tempPath)
                 else:
                     finished_sets.append(path)
+
         return finished_sets
 
 
@@ -236,6 +246,9 @@ def solve_hill_climbing(universal_set: set, subsets: list):
 
 
 if __name__ == "__main__":
+    f = open("output.txt", "w")
+    f.write("")
+    f.close()
     for file in glob.glob('testInputs/*.txt'):
         print(file)
         x, y = readInput(file)
