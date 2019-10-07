@@ -2,9 +2,9 @@
 Repo for AlgoBowl Team 17
 
 Note on Files:
-inputCreator.py generates an input in the createdInput.txt file
-Heuristic.py finds the best output given an input
-verifier.py verifies inputs for correctness
++ inputCreator.py generates an input in the createdInput.txt file
++ Heuristic.py finds the best output given an input
++ verifier.py verifies inputs for correctness
 
 CSCI 406: AlgoBOWL
 
