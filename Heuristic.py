@@ -27,8 +27,11 @@ def readInput(filename):
     uniSetNum = int(f.readline())
     setNums = f.readline()
     for line in f:
+        if line == "\n":
+            tempWeight = int(f.readline())
+            continue
         tempSet = {int(j) for j in line.split()}
-        tempWeight = int(f.readline());
+        tempWeight = int(f.readline())
         outputTup.append((tempSet, tempWeight))
     uniSet = {i for i in range(1, uniSetNum + 1)}
     f.close()
