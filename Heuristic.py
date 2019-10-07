@@ -250,25 +250,25 @@ def solve_hill_climbing(universal_set: set, subsets: list):
 
 
 if __name__ == "__main__":
-    f = open("output.txt", "w")
-    f.write("")
-    f.close()
-    f = open("output.txt", "a")
     for file in glob.glob('testInputs/*.txt'):
         print(file)
         x, y = readInput(file)
+        f = open(f'testOutputs/{file[11:16]}Hill.txt', 'w')
         hill_output = solve_hill_climbing(x.copy(), y.copy())[1:]
-        f.write(f"{file} Solutions\nHill Solution: \n")
         formatOutput(hill_output[0], hill_output[1],f)
+        f.close()
         print(f"Hill: Sets: {hill_output[1]}, Cost: {hill_output[0]}")
         # TODO: Implement spotlight search using annealing for choosing the k paths
-        f.write("Spotlight Search Solution: \n")
+        f = open(f'testOutputs/{file[11:16]}Spotlight.txt', 'w')
         ss = SpotlightSearch(x.copy(), y.copy(), chosing_method=k_min, k=30,
                              key=operator.methodcaller('get_reweighted'))
+
         print(f"Spotlight: {k_min(ss.solve(), 1, key=operator.attrgetter('cost'))[0]}")
-        f.write("Random Spotlight Search Solution: \n")
+        f.close()
+        f = open(f'testOutputs/{file[11:16]}RandomSpotlight.txt', 'w')
         ssr = SpotlightSearch(x.copy(), y.copy(), chosing_method=k_weighted_random, k=30,
                               key=operator.methodcaller('get_reweighted'))
+
         print(f"Random Spotlight: {k_min(ssr.solve(), 1, key=operator.attrgetter('cost'))[0]}")
+        f.close()
         print("_______________________________________________________________")
-    f.close()
