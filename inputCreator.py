@@ -1,6 +1,6 @@
 import random
 
-#from Heuristic import makeInputFile
+from Heuristic import makeInputFile
 
 
 def set_creator(universal_set):
@@ -20,9 +20,6 @@ def set_creator(universal_set):
 # Parameters
 size = 500
 big_subset_weight = 1000
-
-# create output file
-output = open("createdInput.txt", "w")
 
 # build the universal set
 universal_set = [i+1 for i in range(size)]
@@ -75,10 +72,4 @@ if len(subsets_and_weights) > 500:
     raise ValueError("Too many subsets: ".format(len(subsets_and_weights)))
 
 # save the input
-output.write(str(size) + "\n")
-output.write(str(len(subsets_and_weights)) + "\n")
-i = 0
-while i < len(subsets_and_weights):
-    output.write(str(subsets_and_weights[i][0]) + "\n")
-    output.write(str(subsets_and_weights[i][1]) + "\n")
-    i+=1
+makeInputFile("testInputs/input7.txt", subsets_and_weights, size)

@@ -1,3 +1,5 @@
+import glob
+
 def readInput(filename):
     outputTup = []
     uniSet = {}
@@ -6,11 +8,12 @@ def readInput(filename):
     setNums = f.readline()
     for line in f:
         tempSet = {int(j) for j in line.split()}
-        tempWeight = int(f.readline());
+        tempWeight = int(f.readline())
         outputTup.append((tempSet, tempWeight))
     uniSet = {i for i in range(1, uniSetNum + 1)}
     f.close()
     return uniSet, outputTup
+
 
 def readOutput(filename):
     x = open(filename, "r")
@@ -18,6 +21,7 @@ def readOutput(filename):
     weight = int(x.readline())
     outputSets = x.readline().split()
     return weight, outputSets
+
 
 def determineCorrectness(unified, allSets, chosen, weightTotal):
     setOfChosen = set()
@@ -40,9 +44,7 @@ def determineCorrectness(unified, allSets, chosen, weightTotal):
         print("incorrect set coverage")
 
 
-uniSet, allSets = readInput("input.txt")
-totalWeight, chosenSets = readOutput("output.txt")
-determineCorrectness(uniSet, allSets, chosenSets, totalWeight)
-
-
-
+for i in glob.glob("testOutput/*.txt"):
+    uniSet, allSets = readInput("input.txt")
+    totalWeight, chosenSets = readOutput("output.txt")
+    print(f"{i} : {determineCorrectness(uniSet, allSets, chosenSets, totalWeight)}")
