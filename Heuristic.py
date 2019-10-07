@@ -3,6 +3,15 @@ import operator
 import random
 from math import exp
 
+def formatOutput(cost, chosen_sets,f):
+    f.write(str(cost) + "\n")
+    for i in chosen_sets:
+        if i == chosen_sets[-1]:
+            f.write(str(i))
+        else:
+            f.write(str(i) + " ")
+    f.write("\n")
+
 
 def readInput(filename):
     """
@@ -163,15 +172,7 @@ class SpotlightSearch:
             return self.cost / len(self.current_set)
 
         def __repr__(self):
-            f = open("output.txt", "a")
-            f.write(str(self.cost) + "\n")
-            for i in self.chosen_sets:
-                if i == self.chosen_sets[-1]:
-                    f.write(str(i))
-                else:
-                    f.write(str(i) + " ")
-            f.write("\n")
-            f.close()
+            formatOutput(self.cost,self.chosen_sets,f)
             return f'Sets: {sorted(self.chosen_sets)}, Cost: {self.cost}'
 
     def __init__(self, universal_set, subsets, chosing_method, *args, **kwargs):
@@ -249,16 +250,22 @@ if __name__ == "__main__":
     f = open("output.txt", "w")
     f.write("")
     f.close()
+    f = open("output.txt", "a")
     for file in glob.glob('testInputs/*.txt'):
         print(file)
         x, y = readInput(file)
         hill_output = solve_hill_climbing(x.copy(), y.copy())[1:]
+        f.write(f"{file} Solutions\nHill Solution: \n")
+        formatOutput(hill_output[0], hill_output[1],f)
         print(f"Hill: Sets: {hill_output[1]}, Cost: {hill_output[0]}")
         # TODO: Implement spotlight search using annealing for choosing the k paths
+        f.write("Spotlight Search Solution: \n")
         ss = SpotlightSearch(x.copy(), y.copy(), chosing_method=k_min, k=30,
                              key=operator.methodcaller('get_reweighted'))
         print(f"Spotlight: {k_min(ss.solve(), 1, key=operator.attrgetter('cost'))[0]}")
+        f.write("Random Spotlight Search Solution: \n")
         ssr = SpotlightSearch(x.copy(), y.copy(), chosing_method=k_weighted_random, k=30,
                               key=operator.methodcaller('get_reweighted'))
         print(f"Random Spotlight: {k_min(ssr.solve(), 1, key=operator.attrgetter('cost'))[0]}")
         print("_______________________________________________________________")
+    f.close()
