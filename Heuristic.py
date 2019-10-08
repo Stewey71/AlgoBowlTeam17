@@ -133,7 +133,10 @@ def k_weighted_random(list, k, key=None) -> list:
     lookup = dict()
     val = minimum
     for data in list:
-        curr_val = exp((maximum + 1) - round(key(data)))
+        try:
+            curr_val = exp((maximum + 1) - round(key(data)))
+        except OverflowError:
+            continue
         min_val = val
         val += curr_val
         lookup[(min_val, val)] = data
@@ -346,7 +349,6 @@ class SimulatedAnnealing:
                     if old_cost < best_solve.cost():
                         best_solve = bin
             temperature *= rate
-
         # Get rid of any sets that are not required
         for index, i in enumerate(best_solve.all_subsets):
             if i:
@@ -364,7 +366,7 @@ class SimulatedAnnealing:
 
 
 if __name__ == "__main__":
-    for file in sorted(glob.glob('testInputs/*.txt')):
+    for file in sorted(glob.glob('inputs/*.txt')):
         print(file)
         x, y = readInput(file)
 
@@ -394,22 +396,25 @@ if __name__ == "__main__":
             number_1_result = result.chosen_sets
             number_1_cost = result.cost
 
-        sa = SimulatedAnnealing(x.copy(), y.copy())
-        sar = sa.solve(10, 0.0001, 0.9)
-        print(f"Simulated Annealing: Sets: {sar[0]}, Cost: {sar[1]}")
-        if sar[1] < number_1_cost:
-            number_1_cost = sar[1]
-            number_1_result = sar[0]
+        for i in range(5):
+            sa = SimulatedAnnealing(x.copy(), y.copy())
+            sar = sa.solve(10, 0.001, 0.9)
+            print(f"Simulated Annealing: Sets: {sar[0]}, Cost: {sar[1]}")
+            if sar[1] < number_1_cost:
+                number_1_cost = sar[1]
+                number_1_result = sar[0]
 
-        sa = SimulatedAnnealing(x.copy(), y.copy())
-        sar = sa.solve(10, 0.001, 0.9, seed=hill_output[1])
-        print(f"Simulated Annealing seeded: Sets: {sar[0]}, Cost: {sar[1]}")
-        if sar[1] < number_1_cost:
-            number_1_cost = sar[1]
-            number_1_result = sar[0]
+
+            sa = SimulatedAnnealing(x.copy(), y.copy())
+            sar = sa.solve(10, 0.001, 0.9, seed=hill_output[1])
+            print(f"Simulated Annealing seeded: Sets: {sar[0]}, Cost: {sar[1]}")
+            if sar[1] < number_1_cost:
+                number_1_cost = sar[1]
+                number_1_result = sar[0]
+
         m = re.search("group\d\d*",file)
         file = m.group(0)
-        f = open(f'Outputs/{file}', 'w')
+        f = open(f'outputs/{file}.txt', 'w')
         formatOutput(number_1_cost, number_1_result, f)
         f.close()
         print(f"\nBest Result: Sets: {number_1_result}, Cost: {number_1_cost}")

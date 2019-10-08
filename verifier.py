@@ -1,4 +1,5 @@
 import glob
+import re
 
 def readInput(filename):
     outputTup = []
@@ -6,7 +7,8 @@ def readInput(filename):
     f = open(filename, "r")
     uniSetNum = int(f.readline())
     setNums = f.readline()
-    for line in f:
+    for i in range(int(setNums)):
+        line = f.readline()
         tempSet = {int(j) for j in line.split()}
         tempWeight = int(f.readline())
         outputTup.append((tempSet, tempWeight))
@@ -44,8 +46,9 @@ def determineCorrectness(unified, allSets, chosen, weightTotal):
         return "Incorrect set coverage"
 
 
-for i in sorted(glob.glob("testOutputs/*.txt")):
-    file = "input_group" + str(93+i)
-    uniSet, allSets = readInput("testInputs/" + file + ".txt")
-    totalWeight, chosenSets = readOutput(i)
-    print(f"{i} : {determineCorrectness(uniSet, allSets, chosenSets, totalWeight)}")
+for file in sorted(glob.glob("outputs/*.txt")):
+    m = re.search("group\d\d*",file)
+    file_input = "input_" + m.group(0)
+    uniSet, allSets = readInput("inputs/" + file_input + ".txt")
+    totalWeight, chosenSets = readOutput(file)
+    print(f"{file} : {determineCorrectness(uniSet, allSets, chosenSets, totalWeight)}")
