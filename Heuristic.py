@@ -407,7 +407,8 @@ if __name__ == "__main__":
         if sar[1] < number_1_cost:
             number_1_cost = sar[1]
             number_1_result = sar[0]
-        file = re.search("group\d\d*",file)
+        m = re.search("group\d\d*",file)
+        file = m.group(0)
         f = open(f'Outputs/{file}', 'w')
         formatOutput(number_1_cost, number_1_result, f)
         f.close()
