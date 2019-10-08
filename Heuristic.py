@@ -398,7 +398,7 @@ if __name__ == "__main__":
 
         for i in range(5):
             sa = SimulatedAnnealing(x.copy(), y.copy())
-            sar = sa.solve(10, 0.001, 0.9)
+            sar = sa.solve(initial_temperature=15, end_temperature=0.001, rate=0.9, per_temp=100)
             print(f"Simulated Annealing: Sets: {sar[0]}, Cost: {sar[1]}")
             if sar[1] < number_1_cost:
                 number_1_cost = sar[1]
