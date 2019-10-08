@@ -329,6 +329,7 @@ class SimulatedAnnealing:
             seed = [i + 1 for i, _ in enumerate(self.subsets)]
         bin = SimulatedAnnealing.SubsetBins(all_subsets=[False for i in self.subsets], active_subsets=seed,
                                             lookup_table=self.subsets_master_reverse)
+        best_solve = bin
         old_cost = bin.cost()
         temperature = initial_temperature
         while temperature >= end_temperature:
@@ -342,9 +343,19 @@ class SimulatedAnnealing:
                 if ap > random.random():
                     bin = new_bin
                     old_cost = new_cost
+                    if old_cost < best_solve.cost():
+                        best_solve = bin
             temperature *= rate
-        result = bin.get_sets()
-        return result, old_cost
+
+        # Get rid of any sets that are not required
+        for index, i in enumerate(best_solve.all_subsets):
+            if i:
+                best_solve.all_subsets[index] = False
+                if not best_solve.covers(self.universal_set):
+                    best_solve.all_subsets[index] = True
+
+        result = best_solve.get_sets()
+        return result, best_solve.cost()
 
     def _set_to_int(self, sety_boi, weight=None):
         if weight is not None:
@@ -353,30 +364,59 @@ class SimulatedAnnealing:
 
 
 if __name__ == "__main__":
-    for file in sorted(glob.glob('testInputs/*.txt')):
+    for file in sorted(glob.glob('testInputs/*7.txt')):
         print(file)
         x, y = readInput(file)
+
+        number_1_result = []
+        number_1_cost = 10000000
 
         with open(f'testOutputs/{file[11:16]}Hill.txt', 'w') as f:
             hill_output = solve_hill_climbing(x.copy(), y.copy())[1:]
             formatOutput(hill_output[0], hill_output[1], f)
             print(f"Hill: Sets: {hill_output[1]}, Cost: {hill_output[0]}")
+            if hill_output[0] < number_1_cost:
+                number_1_result = hill_output[1]
+                number_1_cost = hill_output[0]
 
         with open(f'testOutputs/{file[11:16]}Spotlight.txt', 'w') as f:
             ss = LocalBeamSearch(x.copy(), y.copy(), chosing_method=k_min, k=30,
                                  key=operator.methodcaller('get_reweighted'))
 
-            print(f"Spotlight: {k_min(ss.solve(), 1, key=operator.attrgetter('cost'))[0]}")
+            result = k_min(ss.solve(), 1, key=operator.attrgetter('cost'))[0]
+            print(f"Local Beam: {result}")
+            if result.cost < number_1_cost:
+                number_1_result = result.chosen_sets
+                number_1_cost = result.cost
 
         with open(f'testOutputs/{file[11:16]}RandomSpotlight.txt', 'w') as f:
             ssr = LocalBeamSearch(x.copy(), y.copy(), chosing_method=k_weighted_random, k=30,
                                   key=operator.methodcaller('get_reweighted'))
-            print(f"Random Local Beam: {k_min(ssr.solve(), 1, key=operator.attrgetter('cost'))[0]}")
+            result = k_min(ssr.solve(), 1, key=operator.attrgetter('cost'))[0]
+            print(f"Random Local Beam: {result}")
+            if result.cost < number_1_cost:
+                number_1_result = result.chosen_sets
+                number_1_cost = result.cost
 
         with open(f'testOutputs/{file[11:16]}SimulatedAnneal.txt', 'w') as f:
             sa = SimulatedAnnealing(x.copy(), y.copy())
-            sar = sa.solve(10, 0.001, 0.9)
+            sar = sa.solve(10, 0.0001, 0.9)
             formatOutput(sar[1], sar[0], f)
             print(f"Simulated Annealing: Sets: {sar[0]}, Cost: {sar[1]}")
+            if sar[1] < number_1_cost:
+                number_1_cost = sar[1]
+                number_1_result = sar[0]
 
+        with open(f'testOutputs/{file[11:16]}SimulatedAnnealSeeded.txt', 'w') as f:
+            sa = SimulatedAnnealing(x.copy(), y.copy())
+            sar = sa.solve(10, 0.001, 0.9, seed=hill_output[1])
+            formatOutput(sar[1], sar[0], f)
+            print(f"Simulated Annealing seeded: Sets: {sar[0]}, Cost: {sar[1]}")
+            if sar[1] < number_1_cost:
+                number_1_cost = sar[1]
+                number_1_result = sar[0]
+
+        with open(f'testOutputs/{file[11:16]}Result.txt', 'w') as f:
+            formatOutput(number_1_cost, number_1_result, f)
+            print(f"\nBest Result: Sets: {number_1_result}, Cost: {number_1_cost}")
         print("_______________________________________________________________")
