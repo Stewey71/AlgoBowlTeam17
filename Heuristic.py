@@ -405,12 +405,12 @@ if __name__ == "__main__":
                 number_1_result = sar[0]
 
 
-            sa = SimulatedAnnealing(x.copy(), y.copy())
-            sar = sa.solve(10, 0.001, 0.9, seed=hill_output[1])
-            print(f"Simulated Annealing seeded: Sets: {sar[0]}, Cost: {sar[1]}")
-            if sar[1] < number_1_cost:
-                number_1_cost = sar[1]
-                number_1_result = sar[0]
+        sa = SimulatedAnnealing(x.copy(), y.copy())
+        sar = sa.solve(10, 0.001, 0.9, seed=hill_output[1])
+        print(f"Simulated Annealing seeded: Sets: {sar[0]}, Cost: {sar[1]}")
+        if sar[1] < number_1_cost:
+            number_1_cost = sar[1]
+            number_1_result = sar[0]
 
         m = re.search("group\d\d*",file)
         file = m.group(0)
