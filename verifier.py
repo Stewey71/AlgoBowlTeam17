@@ -45,6 +45,7 @@ def determineCorrectness(unified, allSets, chosen, weightTotal):
 
 
 for i in sorted(glob.glob("testOutputs/*.txt")):
-    uniSet, allSets = readInput("testInputs/" + i[12:17] + ".txt")
+    file = "input_group" + str(93+i)
+    uniSet, allSets = readInput("testInputs/" + file + ".txt")
     totalWeight, chosenSets = readOutput(i)
     print(f"{i} : {determineCorrectness(uniSet, allSets, chosenSets, totalWeight)}")
