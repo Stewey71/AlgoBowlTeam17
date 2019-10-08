@@ -1,6 +1,7 @@
 import glob
 import operator
 import random
+import re
 from math import exp
 
 
@@ -176,7 +177,6 @@ class LocalBeamSearch:
             return self.cost / len(self.current_set)
 
         def __repr__(self):
-            formatOutput(self.cost, self.chosen_sets, f)
             return f'Sets: {sorted(self.chosen_sets)}, Cost: {self.cost}'
 
     def __init__(self, universal_set, subsets, chosing_method, *args, **kwargs):
@@ -407,8 +407,9 @@ if __name__ == "__main__":
         if sar[1] < number_1_cost:
             number_1_cost = sar[1]
             number_1_result = sar[0]
-
-        with open(f'testOutputs/{file[11:16]}Result.txt', 'w') as f:
-            formatOutput(number_1_cost, number_1_result, f)
-            print(f"\nBest Result: Sets: {number_1_result}, Cost: {number_1_cost}")
+        file = re.search("group\d\d*",file)
+        f = open(f'Outputs/{file}', 'w')
+        formatOutput(number_1_cost, number_1_result, f)
+        f.close()
+        print(f"\nBest Result: Sets: {number_1_result}, Cost: {number_1_cost}")
         print("_______________________________________________________________")
