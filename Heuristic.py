@@ -364,7 +364,7 @@ class SimulatedAnnealing:
 
 
 if __name__ == "__main__":
-    for file in sorted(glob.glob('testInputs/*7.txt')):
+    for file in sorted(glob.glob('testInputs/*.txt')):
         print(file)
         x, y = readInput(file)
 
