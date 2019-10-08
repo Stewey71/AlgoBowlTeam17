@@ -31,20 +31,20 @@ def determineCorrectness(unified, allSets, chosen, weightTotal):
         value = allSets[i][0]
         for x in value:
             setOfChosen.add(x)
-    if setOfChosen == unified:
+    if len(unified - setOfChosen) == 0:
         for i in chosen:
             i = int(i)-1
             value = allSets[i][1]
             sum+=value
         if sum == weightTotal:
-            print("success")
+            return "Success"
         else:
-            print("weight imbalance")
+            return "Weight imbalance"
     else:
-        print("incorrect set coverage")
+        return "Incorrect set coverage"
 
 
-for i in glob.glob("testOutput/*.txt"):
-    uniSet, allSets = readInput("input.txt")
-    totalWeight, chosenSets = readOutput("output.txt")
+for i in sorted(glob.glob("testOutputs/*.txt")):
+    uniSet, allSets = readInput("testInputs/" + i[12:17] + ".txt")
+    totalWeight, chosenSets = readOutput(i)
     print(f"{i} : {determineCorrectness(uniSet, allSets, chosenSets, totalWeight)}")

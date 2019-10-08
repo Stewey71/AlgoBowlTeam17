@@ -72,4 +72,4 @@ if len(subsets_and_weights) > 500:
     raise ValueError("Too many subsets: ".format(len(subsets_and_weights)))
 
 # save the input
-makeInputFile("testInputs/input7.txt", subsets_and_weights, size)
+makeInputFile("testInputs/test7.txt", subsets_and_weights, size)

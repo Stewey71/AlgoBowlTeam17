@@ -3,6 +3,7 @@ import operator
 import random
 from math import exp
 
+
 def formatOutput(cost, chosen_sets,f):
     f.write(str(cost) + "\n")
     for i in chosen_sets:
@@ -145,7 +146,7 @@ def k_weighted_random(list, k, key=None) -> list:
     return k_weighted_random
 
 
-class SpotlightSearch:
+class LocalBeamSearch:
     class Path:
         def __init__(self, current_set, chosen_sets, cost, options):
             self.current_set = current_set
@@ -168,14 +169,14 @@ class SpotlightSearch:
                 self.options.remove((subset, weight))
 
         def copy(self):
-            return SpotlightSearch.Path(self.current_set.copy(), self.chosen_sets.copy(), self.cost,
+            return LocalBeamSearch.Path(self.current_set.copy(), self.chosen_sets.copy(), self.cost,
                                         self.options.copy())
 
         def get_reweighted(self):
             return self.cost / len(self.current_set)
 
         def __repr__(self):
-            formatOutput(self.cost,self.chosen_sets,f)
+            formatOutput(self.cost, self.chosen_sets, f)
             return f'Sets: {sorted(self.chosen_sets)}, Cost: {self.cost}'
 
     def __init__(self, universal_set, subsets, chosing_method, *args, **kwargs):
@@ -195,7 +196,7 @@ class SpotlightSearch:
         # Seed solution with all options
         tempPaths = []
         for subset, cost in self.subsets:
-            path = SpotlightSearch.Path(subset, [self._set_to_int(subset, cost)], cost, self.subsets.copy())
+            path = LocalBeamSearch.Path(subset, [self._set_to_int(subset, cost)], cost, self.subsets.copy())
             path.remove_from_options(subset, cost)
             tempPaths.append(path)
         self.paths.extend(tempPaths)
@@ -249,26 +250,133 @@ def solve_hill_climbing(universal_set: set, subsets: list):
     return current_set, cost, sorted(chosen_sets)
 
 
+class SimulatedAnnealing:
+    class SubsetBins:
+        def __init__(self, all_subsets, lookup_table, active_subsets=()):
+            self.all_subsets = all_subsets
+            self.lookup_table = lookup_table
+            for t_set in active_subsets:
+                self.all_subsets[t_set - 1] = True
+
+        def covers(self, universal_set):
+            current_set = []
+            for j in [i + 1 for i, val in enumerate(self.all_subsets) if val]:
+                current_set.extend(self.lookup_table[j][0])
+            current_set = set(current_set)
+            return len(universal_set - current_set) == 0
+
+        def cost(self) -> int:
+            """
+            finds the cost of the bin
+            :return: sum of the weights for the active subsets of the bin
+            """
+            cost = 0
+            for j in [i + 1 for i, val in enumerate(self.all_subsets) if val]:
+                cost += self.lookup_table[j][1]
+            return cost
+
+        def get_sets(self):
+            return [j for j in [i + 1 for i, val in enumerate(self.all_subsets) if val]]
+
+        def copy(self):
+            copy = SimulatedAnnealing.SubsetBins(self.all_subsets.copy(), self.lookup_table)
+            return copy
+
+        def __repr__(self):
+            return f"Sets: {self.active_sets}, Cost: {self.cost()}"
+
+    def __init__(self, universal_set, subsets):
+        self.universal_set = universal_set
+        self.subsets = subsets
+        self.subsets_master = dict([(f"{key[0]}{key[1]}", i + 1) for i, key in enumerate(self.subsets)])
+        self.subsets_master_reverse = dict([(i + 1, key) for i, key in enumerate(self.subsets)])
+        self.current_sets = []
+
+    def acceptance_probability(self, old_cost, new_cost, temperature) -> float:
+        """
+        finds the probability that the new solution is chosen
+        :param old_cost:
+        :param new_cost:
+        :param temperature:
+        :return:
+        """
+        return exp((old_cost - new_cost) / temperature)
+
+    def neighbor(self, bin):
+        # swap every value in active to inactive
+        # test if the bin has coverage
+        neighbor = None
+        number_of_possibilities = 0
+        # For the sets swap a set from active to inactive or reverse, check for coverage
+        # if covering use reservoir selection to decide if we we are using that bin
+        # pop the modifications to the bin
+        for i in range(len(bin.all_subsets)):
+            original_state = bin.all_subsets[i]
+            bin.all_subsets[i] = not original_state
+            if not original_state:
+                number_of_possibilities += 1
+                if random.randrange(0, number_of_possibilities) <= 1:
+                    neighbor = bin.copy()
+            elif bin.covers(self.universal_set):
+                number_of_possibilities += 1
+                if random.randrange(0, number_of_possibilities) <= 1:
+                    neighbor = bin.copy()
+            bin.all_subsets[i] = original_state
+        return neighbor
+
+    def solve(self, initial_temperature, end_temperature, rate, seed=None, per_temp=100):
+        if seed is None:
+            seed = [i + 1 for i, _ in enumerate(self.subsets)]
+        bin = SimulatedAnnealing.SubsetBins(all_subsets=[False for i in self.subsets], active_subsets=seed,
+                                            lookup_table=self.subsets_master_reverse)
+        old_cost = bin.cost()
+        temperature = initial_temperature
+        while temperature >= end_temperature:
+            for i in range(0, per_temp):
+                new_bin = self.neighbor(bin)
+                new_cost = new_bin.cost()
+                try:
+                    ap = self.acceptance_probability(old_cost, new_cost, temperature)
+                except OverflowError:
+                    ap = 10
+                if ap > random.random():
+                    bin = new_bin
+                    old_cost = new_cost
+            temperature *= rate
+        result = bin.get_sets()
+        return result, old_cost
+
+    def _set_to_int(self, sety_boi, weight=None):
+        if weight is not None:
+            return self.subsets_master[f"{sety_boi}{weight}"]
+        return self.subsets_master[f"{sety_boi[0]}{sety_boi[1]}"]
+
+
 if __name__ == "__main__":
-    for file in glob.glob('testInputs/*.txt'):
+    for file in sorted(glob.glob('testInputs/*.txt')):
         print(file)
         x, y = readInput(file)
-        f = open(f'testOutputs/{file[11:16]}Hill.txt', 'w')
-        hill_output = solve_hill_climbing(x.copy(), y.copy())[1:]
-        formatOutput(hill_output[0], hill_output[1],f)
-        f.close()
-        print(f"Hill: Sets: {hill_output[1]}, Cost: {hill_output[0]}")
-        # TODO: Implement spotlight search using annealing for choosing the k paths
-        f = open(f'testOutputs/{file[11:16]}Spotlight.txt', 'w')
-        ss = SpotlightSearch(x.copy(), y.copy(), chosing_method=k_min, k=30,
-                             key=operator.methodcaller('get_reweighted'))
 
-        print(f"Spotlight: {k_min(ss.solve(), 1, key=operator.attrgetter('cost'))[0]}")
-        f.close()
-        f = open(f'testOutputs/{file[11:16]}RandomSpotlight.txt', 'w')
-        ssr = SpotlightSearch(x.copy(), y.copy(), chosing_method=k_weighted_random, k=30,
-                              key=operator.methodcaller('get_reweighted'))
+        with open(f'testOutputs/{file[11:16]}Hill.txt', 'w') as f:
+            hill_output = solve_hill_climbing(x.copy(), y.copy())[1:]
+            formatOutput(hill_output[0], hill_output[1], f)
+            print(f"Hill: Sets: {hill_output[1]}, Cost: {hill_output[0]}")
 
-        print(f"Random Spotlight: {k_min(ssr.solve(), 1, key=operator.attrgetter('cost'))[0]}")
-        f.close()
+        with open(f'testOutputs/{file[11:16]}Spotlight.txt', 'w') as f:
+            ss = LocalBeamSearch(x.copy(), y.copy(), chosing_method=k_min, k=30,
+                                 key=operator.methodcaller('get_reweighted'))
+
+            print(f"Spotlight: {k_min(ss.solve(), 1, key=operator.attrgetter('cost'))[0]}")
+
+        with open(f'testOutputs/{file[11:16]}RandomSpotlight.txt', 'w') as f:
+            ssr = LocalBeamSearch(x.copy(), y.copy(), chosing_method=k_weighted_random, k=30,
+                                  key=operator.methodcaller('get_reweighted'))
+            print(f"Random Local Beam: {k_min(ssr.solve(), 1, key=operator.attrgetter('cost'))[0]}")
+
+        with open(f'testOutputs/{file[11:16]}SimulatedAnneal.txt', 'w') as f:
+            sa = SimulatedAnnealing(x.copy(), y.copy())
+            sar = sa.solve(10, 0.001, 0.9)
+            formatOutput(sar[1], sar[0], f)
+            print(f"Simulated Annealing: Sets: {sar[0]}, Cost: {sar[1]}")
+
         print("_______________________________________________________________")
