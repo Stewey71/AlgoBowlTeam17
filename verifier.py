@@ -46,9 +46,9 @@ def determineCorrectness(unified, allSets, chosen, weightTotal):
         return "Incorrect set coverage"
 
 
-for file in sorted(glob.glob("outputs/*.txt")):
-    m = re.search("group\d\d*",file)
-    file_input = "input_" + m.group(0)
-    uniSet, allSets = readInput("inputs/" + file_input + ".txt")
+for file in sorted(glob.glob("verification_outputs/*.txt")):
+    #m = re.search("group\d\d*",file)
+    file_input = "input_group109.txt"
+    uniSet, allSets = readInput(file_input)
     totalWeight, chosenSets = readOutput(file)
-    print(f"{file} : {determineCorrectness(uniSet, allSets, chosenSets, totalWeight)}")
+    print(file + " " + determineCorrectness(uniSet, allSets, chosenSets, totalWeight))
